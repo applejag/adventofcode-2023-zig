@@ -14,6 +14,11 @@ const Args = struct {
     part: Part,
 };
 
+const default_args = Args{
+    .day = 0,
+    .part = .part1,
+};
+
 const days = [_]type{
     @import("days/day01.zig"),
     struct {}, // placeholder for day 02
@@ -52,30 +57,55 @@ pub fn main() !void {
 
     const args = try parseArgs(arg_day, arg_part);
 
+    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+    const allocator = gpa.allocator();
+
+    const input = try getInputFile(allocator, args.day);
+    defer allocator.free(input);
+
     std.log.info("Running day {d:0>2} part {d}", .{ args.day, @intFromEnum(args.part) });
 
-    try runDay(args);
+    try runDay(args, input);
 }
 
-fn runDay(args: Args) !void {
+fn getInputFile(allocator: std.mem.Allocator, day: u32) ![]u8 {
+    const day_formatted = try std.fmt.allocPrint(allocator, "day{d:0>2}.txt", .{day});
+    defer allocator.free(day_formatted);
+
+    const path = try std.fs.path.join(allocator, &[_][]const u8{ "input", day_formatted });
+    defer allocator.free(path);
+
+    const file = std.fs.cwd().openFile(path, .{}) catch |err| {
+        if (err == error.FileNotFound) {
+            std.log.err("Tried to open file: {s}", .{path});
+        }
+        return err;
+    };
+    defer file.close();
+
+    const megabyte = 1000 * 1000;
+    return try file.readToEndAlloc(allocator, megabyte);
+}
+
+fn runDay(args: Args, input: []u8) !void {
     return switch (args.day - 1) {
-        inline 0...days.len - 1 => |index| runPart(days[index], args.part),
+        inline 0...days.len - 1 => |index| runPart(days[index], args.part, input),
         else => error.OutOfRange,
     };
 }
 
-fn runPart(comptime day: type, part: Part) !void {
+fn runPart(comptime day: type, part: Part, input: []u8) !void {
     return switch (part) {
         .part1 => {
             if (@hasDecl(day, "part1")) {
-                return day.part1();
+                return day.part1(input);
             }
             std.log.err("This day does not have part 1 implemented.", .{});
             return error.NotImplemented;
         },
         .part2 => {
             if (@hasDecl(day, "part2")) {
-                return day.part2();
+                return day.part2(input);
             }
             std.log.err("This day does not have part 2 implemented.", .{});
             return error.NotImplemented;
@@ -117,10 +147,8 @@ fn parseArgs(arg_day: ?[]const u8, arg_part: ?[]const u8) !Args {
         return error.InvalidArgument;
     }
 
-    var args = Args{
-        .day = day,
-        .part = Part.part1,
-    };
+    var args = default_args;
+    args.day = day;
 
     if (arg_part) |part_str| {
         const part = std.fmt.parseUnsigned(u32, part_str, 10) catch |err| {

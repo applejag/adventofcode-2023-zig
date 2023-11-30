@@ -8,8 +8,14 @@
   ],
   "cSpell.words": [
     "adventofcode",
+    "alloc",
     "applejag",
+    "comptime",
+    "deinit",
+    "errdefer",
+    "isize",
     "jille",
-    "jillejr"
+    "jillejr",
+    "struct"
   ]
 }
