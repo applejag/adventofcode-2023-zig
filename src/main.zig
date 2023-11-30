@@ -65,7 +65,7 @@ pub fn main() !void {
 
     std.log.info("Running day {d:0>2} part {d}", .{ args.day, @intFromEnum(args.part) });
 
-    try runDay(args, input);
+    try runDay(allocator, args, input);
 }
 
 fn getInputFile(allocator: std.mem.Allocator, day: u32) ![]u8 {
@@ -87,25 +87,25 @@ fn getInputFile(allocator: std.mem.Allocator, day: u32) ![]u8 {
     return try file.readToEndAlloc(allocator, megabyte);
 }
 
-fn runDay(args: Args, input: []u8) !void {
+fn runDay(allocator: std.mem.Allocator, args: Args, input: []u8) !void {
     return switch (args.day - 1) {
-        inline 0...days.len - 1 => |index| runPart(days[index], args.part, input),
+        inline 0...days.len - 1 => |index| runPart(days[index], allocator, args.part, input),
         else => error.OutOfRange,
     };
 }
 
-fn runPart(comptime day: type, part: Part, input: []u8) !void {
+fn runPart(comptime day: type, allocator: std.mem.Allocator, part: Part, input: []u8) !void {
     return switch (part) {
         .part1 => {
             if (@hasDecl(day, "part1")) {
-                return day.part1(input);
+                return day.part1(allocator, input);
             }
             std.log.err("This day does not have part 1 implemented.", .{});
             return error.NotImplemented;
         },
         .part2 => {
             if (@hasDecl(day, "part2")) {
-                return day.part2(input);
+                return day.part2(allocator, input);
             }
             std.log.err("This day does not have part 2 implemented.", .{});
             return error.NotImplemented;
