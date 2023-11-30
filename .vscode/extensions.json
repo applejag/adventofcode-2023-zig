@@ -1,6 +1,7 @@
 {
   "recommendations": [
     "ziglang.vscode-zig",
-    "editorconfig.editorconfig"
+    "editorconfig.editorconfig",
+    "streetsidesoftware.code-spell-checker"
   ]
 }
