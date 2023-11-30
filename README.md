@@ -27,3 +27,9 @@ $ zig build run -- 1
 info: Running day 01 part 1
 day01 part1 :)
 ```
+
+The code to run the different days are a bit overkill, but I wanted to try
+how far I could get with Zig's type system.
+
+On the plus side, very far! On the down side, the LSP starts failing to
+understand quite quickly once you do some inline switches and comptime.
