@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Kalle Fagerberg
+//
+// SPDX-License-Identifier: MIT
+
 const std = @import("std");
 
 const Part = enum(u2) {

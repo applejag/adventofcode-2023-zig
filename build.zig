@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Kalle Fagerberg
+//
+// SPDX-License-Identifier: MIT
+
 const std = @import("std");
 
 // Although this function looks imperative, note that its job is to

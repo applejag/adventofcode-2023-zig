@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2023 Kalle Fagerberg
+
+SPDX-License-Identifier: CC-BY-4.0
+-->
+
 # Advent of Code 2022 via Zig
 
 This repo contains my attempt at Advent of Code 2023

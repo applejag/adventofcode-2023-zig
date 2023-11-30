@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Kalle Fagerberg
+//
+// SPDX-License-Identifier: CC0-1.0
+
 .{
     .name = "adventofcode-2023-zig",
     // This is a [Semantic Version](https://semver.org/).

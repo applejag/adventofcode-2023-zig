@@ -30,7 +30,7 @@ node_modules:
 	npm install
 
 .PHONY: lint
-lint: lint-md lint-zig
+lint: lint-md lint-zig lint-license
 
 .PHONY: lint-fix
 lint-fix: lint-md-fix lint-zig-fix
@@ -53,3 +53,6 @@ lint-zig-fix:
 	@echo zig fmt '**/*.zig'
 	@zig fmt $(ZIG_FILES)
 
+.PHONY: lint-license
+lint-license:
+	reuse lint
