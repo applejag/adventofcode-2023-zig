@@ -39,7 +39,7 @@ understand quite quickly once you do some inline switches and comptime.
 This repository is licensed under multiple licenses, following the
 [REUSE](https://reuse.software/) specification (version 3.0).
 
-- All Zig files uses MIT
+- All Zig files uses BSD-3-Clause
 - Some documentation uses CC-BY-4.0
 - Other miscellaneous files uses CC0-1.0
 
