@@ -33,3 +33,15 @@ how far I could get with Zig's type system.
 
 On the plus side, very far! On the down side, the LSP starts failing to
 understand quite quickly once you do some inline switches and comptime.
+
+## License
+
+This repository is licensed under multiple licenses, following the
+[REUSE](https://reuse.software/) specification (version 3.0).
+
+- All Zig files (except build.zig) uses MIT
+- Some documentation uses CC-BY-4.0
+- Other miscellaneous files uses CC0-1.0
+
+See the file header or accompanying `.license` file on a per-file basis
+for a more exact answer.
