@@ -1,0 +1,23 @@
+# SPDX-FileCopyrightText: 2020 James Mills / prologic
+#
+# SPDX-License-Identifier: MIT
+
+name: markdownlint
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  markdownlint:
+    name: remark-lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: markdownlint
+        uses: reviewdog/action-markdownlint@v0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          reporter: github-pr-review
