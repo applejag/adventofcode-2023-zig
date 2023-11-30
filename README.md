@@ -6,6 +6,8 @@ SPDX-License-Identifier: CC-BY-4.0
 
 # Advent of Code 2022 via Zig
 
+[![REUSE status](https://api.reuse.software/badge/github.com/applejag/adventofcode-2023-zig)](https://api.reuse.software/info/github.com/applejag/adventofcode-2023-zig)
+
 This repo contains my attempt at Advent of Code 2023
 (<https://adventofcode.com/2023>).
 
