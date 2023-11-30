@@ -12,11 +12,40 @@ const Args = struct {
 
 const days = [_]type{
     @import("days/day01.zig"),
+    struct {}, // placeholder for day 02
+    struct {}, // placeholder for day 03
+    struct {}, // placeholder for day 04
+    struct {}, // placeholder for day 05
+    struct {}, // placeholder for day 06
+    struct {}, // placeholder for day 07
+    struct {}, // placeholder for day 08
+    struct {}, // placeholder for day 09
+    struct {}, // placeholder for day 10
+    struct {}, // placeholder for day 11
+    struct {}, // placeholder for day 12
+    struct {}, // placeholder for day 13
+    struct {}, // placeholder for day 14
+    struct {}, // placeholder for day 15
+    struct {}, // placeholder for day 16
+    struct {}, // placeholder for day 17
+    struct {}, // placeholder for day 18
+    struct {}, // placeholder for day 19
+    struct {}, // placeholder for day 20
+    struct {}, // placeholder for day 21
+    struct {}, // placeholder for day 22
+    struct {}, // placeholder for day 23
+    struct {}, // placeholder for day 24
+    struct {}, // placeholder for day 25
 };
 
 pub fn main() !void {
     const arg_day = nthArg(1);
     const arg_part = nthArg(2);
+    if (arg_day == null) {
+        printUsage();
+        return;
+    }
+
     const args = try parseArgs(arg_day, arg_part);
 
     std.log.info("Running day {d:0>2} part {d}", .{ args.day, @intFromEnum(args.part) });
@@ -59,8 +88,8 @@ fn printUsage() void {
         \\Usage: {?s} <day> [part]
         \\
         \\Arguments:
-        \\  day    Number between 1 and {d}
-        \\  part   Number between 1 and 2 (optional)
+        \\  day    Advent calendar day. Number between 1 and {d}
+        \\  part   Part of day, 1 or 2 (default 1)
     , .{ exe_path_arg, days.len });
 }
 
@@ -68,7 +97,7 @@ fn parseArgs(arg_day: ?[]const u8, arg_part: ?[]const u8) !Args {
     if (arg_day == null) {
         std.log.err("Missing <day> argument", .{});
         printUsage();
-        return error.MissingArg;
+        return error.MissingArgument;
     }
     const day_str = arg_day.?;
 
