@@ -12,10 +12,43 @@ pub fn part1(allocator: std.mem.Allocator, input: []const u8) !void {
 fn part1Sum(allocator: std.mem.Allocator, input: []const u8) !u32 {
     const game_list = try parseGames(allocator, input);
     defer game_list.deinit();
-    return try sumPossibleGameIDs(game_list);
+    return sumPossibleGameIDs(game_list);
 }
 
-fn sumPossibleGameIDs(game_list: GameList) !u32 {
+test "part1" {
+    const sum = try part1Sum(std.testing.allocator,
+        \\Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green
+        \\Game 2: 1 blue, 2 green; 3 green, 4 blue, 1 red; 1 green, 1 blue
+        \\Game 3: 8 green, 6 blue, 20 red; 5 blue, 4 red, 13 green; 5 green, 1 red
+        \\Game 4: 1 green, 3 red, 6 blue; 3 green, 6 red; 3 green, 15 blue, 14 red
+        \\Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green
+    );
+    try std.testing.expectEqual(@as(u32, 8), sum);
+}
+
+pub fn part2(allocator: std.mem.Allocator, input: []const u8) !void {
+    const sum = try part2Sum(allocator, input);
+    std.log.info("Sum = {d}", .{sum});
+}
+
+fn part2Sum(allocator: std.mem.Allocator, input: []const u8) !u32 {
+    const game_list = try parseGames(allocator, input);
+    defer game_list.deinit();
+    return sumPowerOfGames(game_list);
+}
+
+test "part2" {
+    const sum = try part2Sum(std.testing.allocator,
+        \\Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green
+        \\Game 2: 1 blue, 2 green; 3 green, 4 blue, 1 red; 1 green, 1 blue
+        \\Game 3: 8 green, 6 blue, 20 red; 5 blue, 4 red, 13 green; 5 green, 1 red
+        \\Game 4: 1 green, 3 red, 6 blue; 3 green, 6 red; 3 green, 15 blue, 14 red
+        \\Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green
+    );
+    try std.testing.expectEqual(@as(u32, 2286), sum);
+}
+
+fn sumPossibleGameIDs(game_list: GameList) u32 {
     const max = Set{
         .red_cubes = 12,
         .green_cubes = 13,
@@ -40,6 +73,26 @@ fn sumPossibleGameIDs(game_list: GameList) !u32 {
     }
 
     return sum;
+}
+
+fn sumPowerOfGames(game_list: GameList) u32 {
+    var sum: u32 = 0;
+    for (game_list.games.items) |game| {
+        sum += powerOfGame(game);
+    }
+    return sum;
+}
+
+fn powerOfGame(game: Game) u32 {
+    var max = game.sets.items[0];
+    for (game.sets.items[1..]) |set| {
+        max.red_cubes = @max(max.red_cubes, set.red_cubes);
+        max.green_cubes = @max(max.green_cubes, set.green_cubes);
+        max.blue_cubes = @max(max.blue_cubes, set.blue_cubes);
+    }
+    return @as(u32, max.red_cubes) *
+        @as(u32, max.green_cubes) *
+        @as(u32, max.blue_cubes);
 }
 
 const Set = struct {
@@ -153,15 +206,4 @@ fn hasPrefix(value: []const u8, prefix: []const u8) bool {
         return false;
     }
     return std.mem.eql(u8, value[0..prefix.len], prefix);
-}
-
-test "part1" {
-    const sum = try part1Sum(std.testing.allocator,
-        \\Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green
-        \\Game 2: 1 blue, 2 green; 3 green, 4 blue, 1 red; 1 green, 1 blue
-        \\Game 3: 8 green, 6 blue, 20 red; 5 blue, 4 red, 13 green; 5 green, 1 red
-        \\Game 4: 1 green, 3 red, 6 blue; 3 green, 6 red; 3 green, 15 blue, 14 red
-        \\Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green
-    );
-    try std.testing.expectEqual(@as(u32, 8), sum);
 }
