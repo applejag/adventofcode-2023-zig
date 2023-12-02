@@ -4,7 +4,7 @@
 
 const std = @import("std");
 
-pub fn part1(allocator: std.mem.Allocator, input: []u8) !void {
+pub fn part1(allocator: std.mem.Allocator, input: []const u8) !void {
     _ = allocator;
 
     var sum: i32 = 0;
@@ -36,7 +36,7 @@ pub fn part1(allocator: std.mem.Allocator, input: []u8) !void {
     std.log.info("Sum = {d}", .{sum});
 }
 
-pub fn part2(allocator: std.mem.Allocator, input: []u8) !void {
+pub fn part2(allocator: std.mem.Allocator, input: []const u8) !void {
     _ = allocator;
 
     var sum: i32 = 0;

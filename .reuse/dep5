@@ -1,0 +1,8 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: adventofcode-2023-zig
+Upstream-Contact: Kalle Fagerberg
+Source: https://github.com/applejag/adventofcode-2023-zig
+
+Files: input/*.txt
+Copyright: 2023 Kalle Fagerberg
+License: CC0-1.0
