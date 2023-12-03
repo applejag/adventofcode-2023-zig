@@ -13,10 +13,19 @@
     "comptime",
     "deinit",
     "errdefer",
+    "Fagerberg",
     "isize",
     "jille",
     "jillejr",
+    "Kalle",
+    "orelse",
     "struct",
     "usize"
-  ]
+  ],
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.patterns": {
+    "*": "${capture}.license",
+    "package.json": "package-lock.json",
+    "build.zig": "build.zig.zon"
+  }
 }

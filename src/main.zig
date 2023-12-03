@@ -19,10 +19,10 @@ const default_args = Args{
     .part = .part1,
 };
 
-const days = [_]type{
+const days = [25]type{
     @import("days/day01.zig"),
     @import("days/day02.zig"),
-    struct {}, // placeholder for day 03
+    @import("days/day03.zig"),
     struct {}, // placeholder for day 04
     struct {}, // placeholder for day 05
     struct {}, // placeholder for day 06
