@@ -57,6 +57,100 @@ test "part1" {
     try std.testing.expect(sum == 4361);
 }
 
+pub fn part2(allocator: std.mem.Allocator, input: []const u8) !void {
+    const sum = try part2Sum(allocator, input);
+    std.log.info("Sum = {d}", .{sum});
+}
+
+fn part2Sum(allocator: std.mem.Allocator, input: []const u8) !u32 {
+    var sum: u32 = 0;
+    const slice = try Slice2D.parse(input);
+
+    var number_list = std.ArrayList(Slice2D.NumberIter.Number).init(allocator);
+    defer number_list.deinit();
+
+    var number_iter = slice.iterNumbers();
+    while (number_iter.next()) |num| {
+        const min_x = if (num.x == 0) num.x else num.x - 1;
+        const min_y = if (num.y == 0) num.y else num.y - 1;
+        // We're interested in neighbors, so some +1 here and there.
+        // Zig for range loop has exclusive end.
+        // For x, we get the extra +1 from the num.range.len.
+        // For y, we have +2 instead of +1.
+        const is_cog_adjacent = outer: for (min_x..num.x + num.range.len + 1) |x| {
+            for (min_y..num.y + 2) |y| {
+                if (slice.get(x, y)) |value| {
+                    if (value == '*') {
+                        break :outer true;
+                    }
+                }
+            }
+        } else false;
+
+        if (!is_cog_adjacent) {
+            continue;
+        }
+
+        try number_list.append(num);
+    }
+
+    var char_iter = slice.iter();
+    while (char_iter.next()) |pos| {
+        if (pos.value != '*') {
+            continue;
+        }
+
+        const num1 = for (number_list.items) |num| {
+            if (pos.x + 1 >= num.x and
+                pos.x <= num.x + num.range.len and
+                pos.y + 1 >= num.y and
+                pos.y <= num.y + 1)
+            {
+                break num;
+            }
+        } else {
+            continue;
+        };
+
+        const num2 = for (number_list.items) |num| {
+            if (num.x == num1.x and num.y == num1.y) {
+                continue;
+            }
+            if (pos.x + 1 >= num.x and
+                pos.x <= num.x + num.range.len and
+                pos.y + 1 >= num.y and
+                pos.y <= num.y + 1)
+            {
+                break num;
+            }
+        } else {
+            continue;
+        };
+
+        const parsed1 = try std.fmt.parseUnsigned(u32, num1.range, 10);
+        const parsed2 = try std.fmt.parseUnsigned(u32, num2.range, 10);
+
+        sum += parsed1 * parsed2;
+    }
+    return sum;
+}
+
+test "part2" {
+    const sum = try part2Sum(std.testing.allocator,
+        \\467..114..
+        \\...*......
+        \\..35..633.
+        \\......#...
+        \\617*......
+        \\.....+.58.
+        \\..592.....
+        \\......755.
+        \\...$.*....
+        \\.664.598..
+    );
+    try std.testing.expect(sum == 467835);
+}
+
 test "Slice2D.get" {
     const slice = try Slice2D.parse(
         \\467..114..
