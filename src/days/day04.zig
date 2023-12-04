@@ -16,10 +16,8 @@ fn part1Sum(allocator: std.mem.Allocator, input: []const u8) !u32 {
     var sum: u32 = 0;
     for (card_list.cards.items) |card| {
         var points: u16 = 0;
-        for (card.winning_numbers.items) |winning_num| {
-            if (std.mem.indexOfScalar(u8, card.my_numbers.items, winning_num) != null) {
-                points += if (points == 0) 1 else points;
-            }
+        for (0..card.winning_numbers) |_| {
+            points += if (points == 0) 1 else points;
         }
         sum += points;
     }
@@ -58,15 +56,8 @@ fn part2Sum(allocator: std.mem.Allocator, input: []const u8) !u32 {
 }
 
 fn countCardMatches(card_list: CardList, card: Card) u32 {
-    var matching_numbers_count: u8 = 0;
-    for (card.winning_numbers.items) |winning_num| {
-        if (std.mem.indexOfScalar(u8, card.my_numbers.items, winning_num) != null) {
-            matching_numbers_count += 1;
-        }
-    }
-
     var matches: u32 = 0;
-    for (0..matching_numbers_count) |i| {
+    for (0..card.winning_numbers) |i| {
         if (card_list.get(card.id + @as(u8, @truncate(i)) + 1)) |next_card| {
             matches += 1;
             matches += countCardMatches(card_list, next_card);
@@ -92,9 +83,6 @@ const CardList = struct {
     cards: std.ArrayList(Card),
 
     pub fn deinit(self: @This()) void {
-        for (self.cards.items) |card| {
-            card.deinit();
-        }
         self.cards.deinit();
     }
 
@@ -116,9 +104,7 @@ const CardList = struct {
         const stripped = std.mem.trim(u8, input, "\n ");
         var lines_iter = std.mem.splitScalar(u8, stripped, '\n');
         while (lines_iter.next()) |line| {
-            const card = try Card.parse(allocator, line);
-            errdefer card.deinit();
-            try list.append(card);
+            try list.append(try Card.parse(line));
         }
 
         return CardList{
@@ -129,21 +115,13 @@ const CardList = struct {
 
 const Card = struct {
     id: u8,
-    winning_numbers: std.ArrayList(u8),
-    my_numbers: std.ArrayList(u8),
+    winning_numbers: u8,
 
-    pub fn deinit(self: @This()) void {
-        self.winning_numbers.deinit();
-        self.my_numbers.deinit();
-    }
-
-    pub fn parse(allocator: std.mem.Allocator, input: []const u8) !Card {
+    pub fn parse(input: []const u8) !Card {
         var card = Card{
             .id = 0,
-            .winning_numbers = try std.ArrayList(u8).initCapacity(allocator, 10),
-            .my_numbers = try std.ArrayList(u8).initCapacity(allocator, 25),
+            .winning_numbers = 0,
         };
-        errdefer card.deinit();
 
         const prefix: []const u8 = "Card ";
         const colon_index = std.mem.indexOfScalar(u8, input, ':') orelse {
@@ -161,15 +139,20 @@ const Card = struct {
         const my_numbers_str = numbers_str[pipe_index + 1 ..];
 
         var winning_numbers_iter = std.mem.tokenizeScalar(u8, winning_numbers_str, ' ');
-        while (winning_numbers_iter.next()) |num_str| {
-            const num = try std.fmt.parseUnsigned(u8, num_str, 10);
-            try card.winning_numbers.append(num);
-        }
+        while (winning_numbers_iter.next()) |winning_num_str| {
+            const winning_num = try std.fmt.parseUnsigned(u8, winning_num_str, 10);
 
-        var my_numbers_iter = std.mem.tokenizeScalar(u8, my_numbers_str, ' ');
-        while (my_numbers_iter.next()) |num_str| {
-            const num = try std.fmt.parseUnsigned(u8, num_str, 10);
-            try card.my_numbers.append(num);
+            var my_numbers_iter = std.mem.tokenizeScalar(u8, my_numbers_str, ' ');
+            const is_matching = while (my_numbers_iter.next()) |my_num_str| {
+                const my_num = try std.fmt.parseUnsigned(u8, my_num_str, 10);
+                if (my_num == winning_num) {
+                    break true;
+                }
+            } else false;
+
+            if (is_matching) {
+                card.winning_numbers += 1;
+            }
         }
 
         return card;
