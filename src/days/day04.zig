@@ -160,9 +160,7 @@ const Card = struct {
 };
 
 test "Card.parse" {
-    const card = try Card.parse(std.testing.allocator, "Card  23: 41 48 83 86 17 | 83 86  6 31 17  9 48 53");
-    defer card.deinit();
+    const card = try Card.parse("Card  23: 41 48 83 86 17 | 83 86  6 31 17  9 48 53");
     try std.testing.expect(card.id == 23);
-    try std.testing.expectEqualSlices(u8, &[_]u8{ 41, 48, 83, 86, 17 }, card.winning_numbers.items);
-    try std.testing.expectEqualSlices(u8, &[_]u8{ 83, 86, 6, 31, 17, 9, 48, 53 }, card.my_numbers.items);
+    try std.testing.expect(card.winning_numbers == 4);
 }
