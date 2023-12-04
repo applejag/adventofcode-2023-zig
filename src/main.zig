@@ -23,7 +23,7 @@ const days = [25]type{
     @import("days/day01.zig"),
     @import("days/day02.zig"),
     @import("days/day03.zig"),
-    struct {}, // placeholder for day 04
+    @import("days/day04.zig"),
     struct {}, // placeholder for day 05
     struct {}, // placeholder for day 06
     struct {}, // placeholder for day 07
