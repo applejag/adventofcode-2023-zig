@@ -9,6 +9,7 @@
   "cSpell.words": [
     "adventofcode",
     "alloc",
+    "anytype",
     "applejag",
     "comptime",
     "deinit",
@@ -18,6 +19,8 @@
     "jille",
     "jillejr",
     "Kalle",
+    "memcpy",
+    "memset",
     "orelse",
     "struct",
     "usize"
