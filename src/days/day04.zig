@@ -39,6 +39,55 @@ test "part1" {
     try std.testing.expect(sum == 13);
 }
 
+pub fn part2(allocator: std.mem.Allocator, input: []const u8) !void {
+    const sum = try part2Sum(allocator, input);
+    std.log.info("Sum = {d}", .{sum});
+}
+
+fn part2Sum(allocator: std.mem.Allocator, input: []const u8) !u32 {
+    const card_list = try CardList.parse(allocator, input);
+    defer card_list.deinit();
+
+    var sum: u32 = 0;
+    for (card_list.cards.items) |card| {
+        sum += 1;
+        sum += countCardMatches(card_list, card);
+    }
+
+    return sum;
+}
+
+fn countCardMatches(card_list: CardList, card: Card) u32 {
+    var matching_numbers_count: u8 = 0;
+    for (card.winning_numbers.items) |winning_num| {
+        if (std.mem.indexOfScalar(u8, card.my_numbers.items, winning_num) != null) {
+            matching_numbers_count += 1;
+        }
+    }
+
+    var matches: u32 = 0;
+    for (0..matching_numbers_count) |i| {
+        if (card_list.get(card.id + @as(u8, @truncate(i)) + 1)) |next_card| {
+            matches += 1;
+            matches += countCardMatches(card_list, next_card);
+        }
+    }
+
+    return matches;
+}
+
+test "part2" {
+    const sum = try part2Sum(std.testing.allocator,
+        \\Card 1: 41 48 83 86 17 | 83 86  6 31 17  9 48 53
+        \\Card 2: 13 32 20 16 61 | 61 30 68 82 17 32 24 19
+        \\Card 3:  1 21 53 59 44 | 69 82 63 72 16 21 14  1
+        \\Card 4: 41 92 73 84 69 | 59 84 76 51 58  5 54 83
+        \\Card 5: 87 83 26 28 32 | 88 30 70 12 93 22 82 36
+        \\Card 6: 31 18 13 56 72 | 74 77 10 23 35 67 36 11
+    );
+    try std.testing.expect(sum == 30);
+}
+
 const CardList = struct {
     cards: std.ArrayList(Card),
 
@@ -47,6 +96,17 @@ const CardList = struct {
             card.deinit();
         }
         self.cards.deinit();
+    }
+
+    /// Get a card from the card ID.
+    ///
+    /// This method assumes the cards are in sorted order, [1...cards.len],
+    /// and that there are no gaps in the numbers.
+    pub fn get(self: @This(), card_id: u8) ?Card {
+        if (card_id < 1 or card_id > self.cards.items.len) {
+            return null;
+        }
+        return self.cards.items[card_id - 1];
     }
 
     pub fn parse(allocator: std.mem.Allocator, input: []const u8) !CardList {
