@@ -27,6 +27,7 @@ const days = [_]type{
     @import("days/day04.zig"),
     @import("days/day05.zig"),
     @import("days/day06.zig"),
+    @import("days/day07.zig"),
 };
 
 pub fn main() !void {

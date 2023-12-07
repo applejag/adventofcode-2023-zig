@@ -98,5 +98,5 @@ test "part2" {
         \\Time:      7  15   30
         \\Distance:  9  40  200
     );
-    try std.testing.expect(num == 288);
+    try std.testing.expect(num == 71503);
 }
