@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 
 const std = @import("std");
+const flags = @import("flags.zig");
 
 const Part = enum(u2) {
     part1 = 1,
@@ -19,46 +20,23 @@ const default_args = Args{
     .part = .part1,
 };
 
-const days = [25]type{
+const days = [_]type{
     @import("days/day01.zig"),
     @import("days/day02.zig"),
     @import("days/day03.zig"),
     @import("days/day04.zig"),
     @import("days/day05.zig"),
-    struct {}, // placeholder for day 06
-    struct {}, // placeholder for day 07
-    struct {}, // placeholder for day 08
-    struct {}, // placeholder for day 09
-    struct {}, // placeholder for day 10
-    struct {}, // placeholder for day 11
-    struct {}, // placeholder for day 12
-    struct {}, // placeholder for day 13
-    struct {}, // placeholder for day 14
-    struct {}, // placeholder for day 15
-    struct {}, // placeholder for day 16
-    struct {}, // placeholder for day 17
-    struct {}, // placeholder for day 18
-    struct {}, // placeholder for day 19
-    struct {}, // placeholder for day 20
-    struct {}, // placeholder for day 21
-    struct {}, // placeholder for day 22
-    struct {}, // placeholder for day 23
-    struct {}, // placeholder for day 24
-    struct {}, // placeholder for day 25
 };
 
 pub fn main() !void {
-    const arg_day = nthArg(1);
-    const arg_part = nthArg(2);
-    if (arg_day == null) {
-        printUsage();
-        return;
-    }
-
-    const args = try parseArgs(arg_day, arg_part);
-
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     const allocator = gpa.allocator();
+
+    var args_iter = try std.process.argsWithAllocator(allocator);
+    defer args_iter.deinit();
+    const args = try (parseArgs(args_iter) catch |err| if (err == error.MissingArgument) {
+        return;
+    } else err);
 
     const input = try getInputFile(allocator, args.day);
     defer allocator.free(input);
@@ -113,47 +91,79 @@ fn runPart(comptime day: type, allocator: std.mem.Allocator, part: Part, input: 
     };
 }
 
-fn printUsage() void {
-    var exe_path_arg = nthArg(0);
-    if (exe_path_arg) |*exe_path| {
-        exe_path.* = std.fs.path.basename(exe_path.*);
-    }
+fn printUsage(exe_path: []const u8) void {
+    const exe_basename = std.fs.path.basename(exe_path);
     std.log.info(
-        \\Usage: {?s} <day> [part]
+        \\Usage: {?s} [flags]
         \\
-        \\Arguments:
-        \\  day    Advent calendar day. Number between 1 and {d}
-        \\  part   Part of day, 1 or 2 (default 1)
-    , .{ exe_path_arg, days.len });
+        \\Flags:
+        \\  -d, --day=int    Advent calendar day. Number between 1 and {d}
+        \\  -p, --part=int   Part of day, 1 or 2 (default 1)
+        \\
+    , .{ exe_basename, days.len });
 }
 
-fn parseArgs(arg_day: ?[]const u8, arg_part: ?[]const u8) !Args {
-    if (arg_day == null) {
-        std.log.err("Missing <day> argument", .{});
-        printUsage();
+fn parseArgs(args_iter: std.process.ArgIterator) !Args {
+    var flags_iter = flags.iterate(args_iter);
+
+    var exe_name: []const u8 = "adventofcode-2023-zig";
+    var flag_day: ?[]const u8 = null;
+    var flag_part: ?[]const u8 = null;
+
+    while (flags_iter.next()) |value| {
+        switch (value) {
+            .flag => |flag| {
+                if (std.mem.eql(u8, flag.key, "-d") or
+                    std.mem.eql(u8, flag.key, "--day"))
+                {
+                    flag_day = flag.value;
+                } else if (std.mem.eql(u8, flag.key, "-p") or
+                    std.mem.eql(u8, flag.key, "--part"))
+                {
+                    flag_part = flag.value;
+                } else {
+                    printUsage(exe_name);
+                    std.log.err("Unknown flag: {s}", .{flag.key});
+                    return error.UnexpectedFlag;
+                }
+            },
+            .arg => |arg| {
+                if (arg.position == 0) {
+                    exe_name = arg.value;
+                    continue;
+                }
+                std.log.err("Arguments not allowed", .{});
+                return error.UnexpectedArgument;
+            },
+        }
+    }
+
+    if (flag_day == null) {
+        printUsage(exe_name);
+        std.log.err("Missing required --day flag", .{});
         return error.MissingArgument;
     }
-    const day_str = arg_day.?;
+    const day_str = flag_day.?;
 
     const day = std.fmt.parseUnsigned(u32, day_str, 10) catch |err| {
-        std.log.err("Failed to parse <day> argument: {}", .{err});
-        printUsage();
+        printUsage(exe_name);
+        std.log.err("Failed to parse --day flag: {}", .{err});
         return error.InvalidArgument;
     };
 
     if (day <= 0 or day > days.len) {
-        std.log.err("Argument <day> was out of range (1-{d})", .{days.len});
-        printUsage();
+        printUsage(exe_name);
+        std.log.err("Flag --day was out of range (1-{d})", .{days.len});
         return error.InvalidArgument;
     }
 
     var args = default_args;
     args.day = day;
 
-    if (arg_part) |part_str| {
+    if (flag_part) |part_str| {
         const part = std.fmt.parseUnsigned(u32, part_str, 10) catch |err| {
-            std.log.err("Failed to parse [part] argument: {}", .{err});
-            printUsage();
+            printUsage(exe_name);
+            std.log.err("Failed to parse --part flag: {}", .{err});
             return error.InvalidArgument;
         };
 
@@ -161,26 +171,14 @@ fn parseArgs(arg_day: ?[]const u8, arg_part: ?[]const u8) !Args {
             1 => .part1,
             2 => .part2,
             else => {
-                std.log.err("Argument [part] was out of range (1-2)", .{});
-                printUsage();
+                printUsage(exe_name);
+                std.log.err("Flag --part was out of range (1-2)", .{});
                 return error.InvalidArgument;
             },
         };
     }
 
     return args;
-}
-
-fn nthArg(nth: isize) ?[]const u8 {
-    var index: isize = 0;
-    var iter = std.process.args();
-    while (iter.next()) |arg| {
-        if (nth == index) {
-            return arg;
-        }
-        index += 1;
-    }
-    return null;
 }
 
 test {

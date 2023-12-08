@@ -17,17 +17,17 @@ Requires Zig v0.12.0-dev.1769, 2023-12-01 (or later): <https://ziglang.org/downl
 
 ```console
 $ zig build run
-info: Usage: adventofcode-2023-zig <day> [part]
+info: Usage: adventofcode-2023-zig [flags]
 
-Arguments:
-  day    Advent calendar day. Number between 1 and 25
-  part   Part of day, 1 or 2 (default 1)
+Flags:
+  -d, --day=int    Advent calendar day. Number between 1 and 5
+  -p, --part=int   Part of day, 1 or 2 (default 1)
 ```
 
 ```console
-$ zig build run -- 1
+$ zig build run -- --day 1
 info: Running day 01 part 1
-day01 part1 :)
+info: Sum = 54990
 ```
 
 The code to run the different days are a bit overkill, but I wanted to try
