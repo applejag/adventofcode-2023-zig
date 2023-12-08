@@ -49,3 +49,54 @@ test "part1" {
     );
     try std.testing.expect(num == 288);
 }
+
+pub fn part2(allocator: std.mem.Allocator, input: []const u8) !void {
+    _ = allocator;
+    const num = try part2Num(input);
+    std.log.info("Num = {d}", .{num});
+}
+
+fn part2Num(input: []const u8) !u32 {
+    var lines_iter = std.mem.tokenizeScalar(u8, input, '\n');
+    const time_line = lines_iter.next() orelse return error.InvalidArgument;
+    const distance_line = lines_iter.next() orelse return error.InvalidArgument;
+
+    var time_iter = std.mem.tokenizeScalar(u8, time_line, ' ');
+    var distance_iter = std.mem.tokenizeScalar(u8, distance_line, ' ');
+
+    _ = time_iter.next(); // ignore column "Time:"
+    _ = distance_iter.next(); // ignore column "Distance:"
+
+    var distance: u64 = 0;
+    var time: u64 = 0;
+
+    while (time_iter.next()) |time_str| {
+        const distance_str = distance_iter.next() orelse return error.InvalidArgument;
+        const time_part = try std.fmt.parseUnsigned(u32, time_str, 10);
+        const distance_part = try std.fmt.parseUnsigned(u32, distance_str, 10);
+
+        distance *= std.math.pow(u64, 10, @intCast(distance_str.len));
+        distance += distance_part;
+
+        time *= std.math.pow(u64, 10, @intCast(time_str.len));
+        time += time_part;
+    }
+
+    var ways: u32 = 0;
+
+    for (1..time) |hold_time| {
+        if (hold_time * (time - hold_time) > distance) {
+            ways += 1;
+        }
+    }
+
+    return ways;
+}
+
+test "part2" {
+    const num = try part2Num(
+        \\Time:      7  15   30
+        \\Distance:  9  40  200
+    );
+    try std.testing.expect(num == 288);
+}
